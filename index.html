@@ -58,7 +58,12 @@ body{
 .timg{width:54px;height:54px;border:none;background:none;overflow:visible;position:relative;}
 .timg img{display:none;}
 .timg.playing{animation:none;}
-@keyframes bHue{0%,100%{border-color:#ff6b21}30%{border-color:#ffaa44}65%{border-color:#ff7a35}85%{border-color:#ffd080}}
+@keyframes bHue{0%,100%{stroke:#ff6b21}30%{stroke:#ffaa44}65%{stroke:#ff7a35}85%{stroke:#ffd080}}
+@keyframes bHueBlue{0%,100%{stroke:#4a9eff}30%{stroke:#7cb8ff}65%{stroke:#2f7fe0}85%{stroke:#bfe0ff}}
+@keyframes bHueTeal{0%,100%{stroke:#2dd4bf}30%{stroke:#5eead4}65%{stroke:#14b8a6}85%{stroke:#99f6e4}}
+.thumb-ring{animation:bHue 6s ease-in-out infinite;}
+.thumb-ring-video{animation:bHueBlue 6s ease-in-out infinite;}
+.thumb-ring-audio{animation:bHueTeal 6s ease-in-out infinite;}
 .stitle{color:white;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ssub{color:rgba(255,255,255,0.85);font-size:14px;font-weight:500;}
 .bicons{display:flex;align-items:center;gap:16px;flex-shrink:0;}
@@ -87,15 +92,20 @@ body{
 /* hide the outline img when liked */
 .ibtn.liked img{opacity:0;}
 
-/* heart liked — scale bounce then settle */
-.ibtn.liked img{opacity:0;}
+/* heart liked — gentle scale, particles carry the energy */
 @keyframes heartPop{
   0%  {transform:scale(1);}
-  40% {transform:scale(1.35);}
-  70% {transform:scale(0.88);}
+  45% {transform:scale(1.22);}
   100%{transform:scale(1);}
 }
-.ibtn.liked .hl{animation:heartPop 0.38s cubic-bezier(0.34,1.56,0.64,1) forwards;}
+.ibtn.liked .hl{animation:heartPop 0.4s ease-out forwards;}
+
+/* burst particles — spawned on like, removed after animating out */
+.burst-dot{
+  position:absolute;width:5px;height:5px;border-radius:50%;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  opacity:1;pointer-events:none;z-index:5;
+}
 
 /* entrance animations */
 @keyframes fadeUp{0%{opacity:0;transform:translateY(16px);}100%{opacity:1;transform:translateY(0);}}
@@ -425,7 +435,7 @@ body{
 <g filter="url(#filter0_d_4278_6245)">
 <path d="M7 25C7 13.9543 15.9543 5 27 5V5C38.0457 5 47 13.9543 47 25V25C47 36.0457 38.0457 45 27 45V45C15.9543 45 7 36.0457 7 25V25Z" fill="url(#pattern0_4278_6245)" shape-rendering="crispEdges"/>
 <path d="M7 25C7 13.9543 15.9543 5 27 5V5C38.0457 5 47 13.9543 47 25V25C47 36.0457 38.0457 45 27 45V45C15.9543 45 7 36.0457 7 25V25Z" fill="#14191D" fill-opacity="0.3" shape-rendering="crispEdges"/>
-<path d="M27 4C38.598 4 48 13.402 48 25C48 36.598 38.598 46 27 46C15.402 46 6 36.598 6 25C6 13.402 15.402 4 27 4Z" stroke="#FF6B21" stroke-width="2" shape-rendering="crispEdges"/>
+<path d="M27 4C38.598 4 48 13.402 48 25C48 36.598 38.598 46 27 46C15.402 46 6 36.598 6 25C6 13.402 15.402 4 27 4Z" stroke="#FF6B21" stroke-width="2" shape-rendering="crispEdges" class="thumb-ring-video"/>
 </g>
 <defs>
 <filter id="filter0_d_4278_6245" x="0" y="0" width="54" height="54" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
@@ -532,7 +542,7 @@ body{
 <g filter="url(#filter0_d_4278_6252)">
 <path d="M7 25C7 13.9543 15.9543 5 27 5V5C38.0457 5 47 13.9543 47 25V25C47 36.0457 38.0457 45 27 45V45C15.9543 45 7 36.0457 7 25V25Z" fill="url(#pattern0_4278_6252)" shape-rendering="crispEdges"/>
 <path d="M7 25C7 13.9543 15.9543 5 27 5V5C38.0457 5 47 13.9543 47 25V25C47 36.0457 38.0457 45 27 45V45C15.9543 45 7 36.0457 7 25V25Z" fill="#14191D" fill-opacity="0.3" shape-rendering="crispEdges"/>
-<path d="M27 4C38.598 4 48 13.402 48 25C48 36.598 38.598 46 27 46C15.402 46 6 36.598 6 25C6 13.402 15.402 4 27 4Z" stroke="#FF6B21" stroke-width="2" shape-rendering="crispEdges"/>
+<path d="M27 4C38.598 4 48 13.402 48 25C48 36.598 38.598 46 27 46C15.402 46 6 36.598 6 25C6 13.402 15.402 4 27 4Z" stroke="#FF6B21" stroke-width="2" shape-rendering="crispEdges" class="thumb-ring-audio"/>
 </g>
 <defs>
 <filter id="filter0_d_4278_6252" x="0" y="0" width="54" height="54" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
@@ -639,7 +649,7 @@ body{
 <g filter="url(#filter0_d_4278_6257)">
 <path d="M7 25C7 13.9543 15.9543 5 27 5V5C38.0457 5 47 13.9543 47 25V25C47 36.0457 38.0457 45 27 45V45C15.9543 45 7 36.0457 7 25V25Z" fill="url(#pattern0_4278_6257)" shape-rendering="crispEdges"/>
 <path d="M7 25C7 13.9543 15.9543 5 27 5V5C38.0457 5 47 13.9543 47 25V25C47 36.0457 38.0457 45 27 45V45C15.9543 45 7 36.0457 7 25V25Z" fill="#14191D" fill-opacity="0.3" shape-rendering="crispEdges"/>
-<path d="M27 4C38.598 4 48 13.402 48 25C48 36.598 38.598 46 27 46C15.402 46 6 36.598 6 25C6 13.402 15.402 4 27 4Z" stroke="#FF6B21" stroke-width="2" shape-rendering="crispEdges"/>
+<path d="M27 4C38.598 4 48 13.402 48 25C48 36.598 38.598 46 27 46C15.402 46 6 36.598 6 25C6 13.402 15.402 4 27 4Z" stroke="#FF6B21" stroke-width="2" shape-rendering="crispEdges" class="thumb-ring"/>
 </g>
 <defs>
 <filter id="filter0_d_4278_6257" x="0" y="0" width="54" height="54" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
@@ -746,6 +756,26 @@ function btnPress(el){el.style.transform='scale(0.85)';setTimeout(()=>el.style.t
 const SC=['#ff6b21','#ffaa44','#ffd080','#ff3b6b','#fff','#ffbc85'];
 const liked={v:false,a:false,t:false};
 
+function spawnBurst(ibtn){
+  const n=6;
+  for(let i=0;i<n;i++){
+    const dot=document.createElement('div');
+    dot.className='burst-dot';
+    dot.style.background=SC[i%SC.length];
+    const angle=(i/n)*Math.PI*2+Math.random()*0.3;
+    const dist=20+Math.random()*8;
+    const dx=Math.cos(angle)*dist;
+    const dy=Math.sin(angle)*dist;
+    ibtn.appendChild(dot);
+    requestAnimationFrame(()=>{
+      dot.style.transition='transform 0.5s ease-out,opacity 0.5s ease-out';
+      dot.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(0.4)`;
+      dot.style.opacity='0';
+    });
+    setTimeout(()=>dot.remove(),550);
+  }
+}
+
 function doHeart(id){
   liked[id]=!liked[id];
   const hl=document.getElementById(id+'hl');
@@ -755,7 +785,8 @@ function doHeart(id){
     hl.style.opacity='1';
     // re-trigger bounce animation
     hl.style.animation='none';void hl.offsetWidth;
-    hl.style.animation='heartPop 0.38s cubic-bezier(0.34,1.56,0.64,1) forwards';
+    hl.style.animation='heartPop 0.4s ease-out forwards';
+    spawnBurst(ibtn);
     snd.heart();
   } else {
     ibtn.classList.remove('liked');
@@ -777,26 +808,8 @@ function enterVideo(){
 function enterAudio(){
   aProg=25; // start at 15 seconds (25% of 60s)
   updBarsProgress();
-  // stagger in the centre content items only
-  const items=document.querySelectorAll('.atop > *, .atbtn');
-  items.forEach((el,i)=>{
-    el.style.opacity='0';el.style.transform='translateY(12px)';
-    setTimeout(()=>{
-      el.style.transition='opacity 0.4s ease,transform 0.4s cubic-bezier(0.22,1,0.36,1)';
-      el.style.opacity='1';el.style.transform='';
-      setTimeout(()=>el.style.transition='',440);
-    },80+i*80);
-  });
-  // bars grow up
-  const bars=document.querySelectorAll('#abars .abar');
-  bars.forEach((b,i)=>{
-    b.style.transformOrigin='bottom';b.style.transform='scaleY(0)';b.style.opacity='0';
-    setTimeout(()=>{
-      b.style.transition='transform 0.35s cubic-bezier(0.22,1,0.36,1),opacity 0.25s';
-      b.style.transform='scaleY(1)';b.style.opacity='1';
-      setTimeout(()=>{b.style.transition='';startPulse();startAudioTimer();},380);
-    },50+i*7);
-  });
+  startPulse();
+  startAudioTimer();
 }
 
 let aTimerRaf=null,aLastTime=null;
@@ -835,15 +848,6 @@ function updBarsProgress(){
   document.getElementById('aelapsed').textContent=(Math.floor(s/60)<10?'0':'')+Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;
 }
 function enterQuote(){
-  const qc=document.getElementById('qcard');
-  qc.style.opacity='0';
-  qc.style.transform='translateY(16px)';
-  setTimeout(()=>{
-    qc.style.transition='opacity 0.42s ease,transform 0.42s cubic-bezier(0.22,1,0.36,1)';
-    qc.style.opacity='1';
-    qc.style.transform='translateX(0)';
-    setTimeout(()=>qc.style.transition='',450);
-  },120);
   startWaterRipple();
 }
 enterVideo();
