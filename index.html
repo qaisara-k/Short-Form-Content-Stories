@@ -1097,104 +1097,77 @@ const QS=[
   {l:'Insight 2 of 3',t:'"Procrastination is a learned tendency. That is something to celebrate."',a:'Eric Jaffe',s:'Change your language, change your life'},
   {l:'Insight 3 of 3',t:'"Start by substituting new thoughts for those that prevent you from changing."',a:'Joseph Ferrari',s:'The transformation of You'},
 ];
-let qi=0,qAnm=false,qDrg=false,qX=0,qX0=0;
+let qi=0,qAnm=false,qDrg=false,qXraw=0,qX0=0,qXvis=0;
 const qwrap=document.getElementById('qwrap');
 const qcard=document.getElementById('qcard');
+const Q_TRAVEL=12;
+const Q_VISMAX=15;
 
 qwrap.addEventListener('mousedown',qDn);
 qwrap.addEventListener('touchstart',qDn,{passive:true});
 
 function qDn(e){
   if(qAnm)return;
-  qDrg=true;qX0=e.touches?e.touches[0].clientX:e.clientX;qX=0;
+  qDrg=true;qX0=e.touches?e.touches[0].clientX:e.clientX;qXraw=0;
   qcard.style.transition='none';
   window.addEventListener('mousemove',qMv);window.addEventListener('mouseup',qUp);
   window.addEventListener('touchmove',qMv,{passive:true});window.addEventListener('touchend',qUp);
 }
 function qMv(e){
   if(!qDrg)return;
-  qX=(e.touches?e.touches[0].clientX:e.clientX)-qX0;
-  const rot=qX*0.04;
-  const scale=Math.max(0.95,1-Math.abs(qX)/1200);
-  qcard.style.transform=`translateX(${qX}px) rotate(${rot}deg) scale(${scale})`;
-  qcard.style.opacity=String(Math.max(0,1-Math.abs(qX)/180));
+  qXraw=(e.touches?e.touches[0].clientX:e.clientX)-qX0;
+  let factor=1;
+  if((qi===0&&qXraw>0)||(qi===QS.length-1&&qXraw<0)) factor=0.45;
+  const sign=qXraw<0?-1:1;
+  const a=Math.abs(qXraw)*factor;
+  qXvis=sign*Q_VISMAX*(1-Math.exp(-a/(Q_VISMAX*1.3)));
+  qcard.style.transform=`translateX(${qXvis}px)`;
+  qcard.style.opacity=String(Math.max(0.55,1-Math.abs(qXraw)/300));
 }
 function qUp(){
   if(!qDrg)return;qDrg=false;
   window.removeEventListener('mousemove',qMv);window.removeEventListener('mouseup',qUp);
   window.removeEventListener('touchmove',qMv);window.removeEventListener('touchend',qUp);
-  Math.abs(qX)>55?qSwipe(qX<0?1:-1):qSnap();
+  if(Math.abs(qXraw)<=50){qSnap();return;}
+  const screenDir=qXraw<0?-1:1;
+  const nextIdx=qi-screenDir;
+  if(nextIdx<0||nextIdx>QS.length-1){qSnap();return;}
+  qSwipe(screenDir);
 }
 function qSnap(){
-  qcard.style.transition='transform 0.36s cubic-bezier(0.34,1.56,0.64,1),opacity 0.22s';
-  qcard.style.transform='translateY(0) scale(1)';
+  qcard.style.transition='transform 0.34s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.24s ease';
+  qcard.style.transform='translateX(0)';
   qcard.style.opacity='1';
-  setTimeout(()=>qcard.style.transition='',380);
+  setTimeout(()=>qcard.style.transition='',360);
 }
-function qSwipe(dir){
+function qSwipe(screenDir){
   qAnm=true;
   snd.quotePage();
   snd.paperTear();
 
-  const t=['A','B','C'][qi%3]; // Quote 1=Slide, Quote 2=Dissolve, Quote 3=Swipe
-
-  // ── EXIT ──
-  if(t==='A'){
-    // Option A: Slide Up — card exits upward
-    qcard.style.transition='transform 0.26s cubic-bezier(0.4,0,0.8,0.2),opacity 0.22s';
-    qcard.style.transform=`translateY(${dir<0?-60:60}px)`;
-    qcard.style.opacity='0';
-  } else if(t==='B'){
-    // Option B: Cross Dissolve + Scale — card fades and shrinks
-    qcard.style.transition='transform 0.28s ease,opacity 0.28s ease';
-    qcard.style.transform='scale(0.9)';
-    qcard.style.opacity='0';
-  } else {
-    // Option C: Horizontal Slide — card exits sideways with tilt
-    qcard.style.transition='transform 0.26s cubic-bezier(0.4,0,0.8,0.2),opacity 0.22s';
-    qcard.style.transform=`translateX(${dir<0?-340:340}px) rotate(${dir<0?-8:8}deg)`;
-    qcard.style.opacity='0';
-  }
+  qcard.style.transition='transform 0.26s ease,opacity 0.24s ease';
+  qcard.style.transform=`translateX(${screenDir*Q_TRAVEL}px) scale(0.98)`;
+  qcard.style.opacity='0';
 
   setTimeout(()=>{
-    qi=(qi+dir+QS.length)%QS.length;
+    qi=qi-screenDir;
     const d=QS[qi];
     document.getElementById('qlbl').textContent=d.l;
     document.getElementById('qtxt').textContent=d.t;
     document.getElementById('qauthor').textContent=d.a;
     document.getElementById('qsrc').textContent=d.s;
     document.getElementById('qsavebtn').classList.remove('saved');
-    [0,1,2].forEach(i=>{const el=document.getElementById('d'+i);if(el){el.style.background=i===qi%3?'white':'rgba(255,255,255,0.35)';}});
+    [0,1,2].forEach(i=>{const el=document.getElementById('d'+i);if(el){el.style.background=i===qi?'white':'rgba(255,255,255,0.35)';}});
 
-    // ── ENTER ──
     qcard.style.transition='none';
-    if(t==='A'){
-      // enter from opposite direction
-      qcard.style.transform=`translateY(${dir<0?50:-50}px)`;
-      qcard.style.opacity='0';
-      void qcard.offsetWidth;
-      qcard.style.transition='transform 0.38s cubic-bezier(0.22,1,0.36,1),opacity 0.3s ease';
-      qcard.style.transform='translateY(0)';
-      qcard.style.opacity='1';
-    } else if(t==='B'){
-      // grow in from slightly smaller
-      qcard.style.transform='scale(1.06)';
-      qcard.style.opacity='0';
-      void qcard.offsetWidth;
-      qcard.style.transition='transform 0.38s cubic-bezier(0.22,1,0.36,1),opacity 0.32s ease';
-      qcard.style.transform='scale(1)';
-      qcard.style.opacity='1';
-    } else {
-      // slide in from opposite side
-      qcard.style.transform=`translateX(${dir<0?340:-340}px) rotate(${dir<0?8:-8}deg)`;
-      qcard.style.opacity='0';
-      void qcard.offsetWidth;
-      qcard.style.transition='transform 0.38s cubic-bezier(0.22,1,0.36,1),opacity 0.3s ease';
-      qcard.style.transform='translateX(0) rotate(0deg)';
-      qcard.style.opacity='1';
-    }
-    setTimeout(()=>{qcard.style.transition='';qAnm=false;},400);
-  },280);
+    qcard.style.transform=`translateX(${-screenDir*Q_TRAVEL}px) scale(0.97)`;
+    qcard.style.opacity='0';
+    void qcard.offsetWidth;
+    qcard.style.transition='transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.44s ease';
+    qcard.style.transform='translateX(0) scale(1)';
+    qcard.style.opacity='1';
+    setTimeout(()=>{qcard.style.transition='';qAnm=false;},520);
+  },240);
 }
 
 // Save quote — wax seal stamp effect
