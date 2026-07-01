@@ -314,47 +314,6 @@ body{
 .qattrib-line{width:70px;height:1px;background:rgba(255,255,255,0.4);}
 .qauthor{font-size:16px;font-weight:700;color:white;text-align:center;width:100%;}
 .qsource{font-family:'Platypi',serif;font-weight:500;font-size:16px;color:#a6b5c2;text-align:center;width:100%;}
-.qcard-bottom{display:flex;flex-direction:column;gap:12px;align-items:center;width:100%;}
-.qcard-divider{width:100%;height:1px;background:rgba(255,255,255,0.18);}
-.qsave-btn{
-  display:flex;align-items:center;justify-content:center;gap:4px;
-  padding:8px 16px;cursor:pointer;width:100%;
-  color:white;font-size:17px;font-weight:500;
-  transition:color 0.22s;white-space:nowrap;
-}
-.qsave-btn:active{opacity:0.7;}
-.qsave-btn svg{width:24px;height:24px;flex-shrink:0;transition:fill 0.22s,stroke 0.22s;}
-.qsave-btn img{width:24px;height:24px;transition:filter 0.22s;}
-/* saved state — text AND icon go grey via currentColor */
-.qsave-btn.saved{color:rgba(255,255,255,0.38);}
-.qsave-btn.saved img{filter:brightness(0.38) saturate(0);}
-/* wax seal animation */
-@keyframes sealStamp{
-  0%  {transform:translate(-50%,-50%) scale(2.5);opacity:0;}
-  30% {transform:translate(-50%,-50%) scale(0.85);opacity:1;}
-  55% {transform:translate(-50%,-50%) scale(1.08);opacity:1;}
-  75% {transform:translate(-50%,-50%) scale(0.96);opacity:1;}
-  100%{transform:translate(-50%,-50%) scale(1);opacity:1;}
-}
-@keyframes sealFade{
-  0%  {opacity:1;}
-  60% {opacity:1;}
-  100%{opacity:0;}
-}
-.wax-seal{
-  position:absolute;left:50%;top:50%;
-  transform:translate(-50%,-50%) scale(2.5);
-  pointer-events:none;z-index:100;
-  font-size:52px;line-height:1;
-  filter:drop-shadow(0 4px 12px rgba(180,60,0,0.5));
-  animation:sealStamp 0.55s cubic-bezier(0.34,1.2,0.64,1) forwards,
-            sealFade 0.4s ease-out 0.9s forwards;
-}
-
-@keyframes saveRipple{
-  0%{width:0;height:0;opacity:0.5}
-  100%{width:300px;height:300px;opacity:0}
-}
 
 /* 3 paging dots */
 .qdots{display:flex;gap:8px;align-items:center;}
@@ -623,13 +582,6 @@ body{
               <div class="qsource" id="qsrc">The transformation of You</div>
             </div>
           </div>
-          <div class="qcard-bottom">
-            <div style="width:100%;height:1px;background:rgba(255,255,255,0.18);"></div>
-            <div class="qsave-btn" id="qsavebtn" onclick="saveQuote(event)">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;transition:color 0.22s"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span class="qsave-txt">Save Quote</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -822,10 +774,8 @@ function startAudioTimer(){
       aProg=Math.min(100,aProg+(delta/60000)*100);
       updBarsProgress();
       if(aProg>=100){
-        aProg=25;
-        updBarsProgress();
-        aLastTime=ts;
-        aTimerRaf=requestAnimationFrame(tick);
+        cancelAnimationFrame(aTimerRaf);
+        setTimeout(()=>{ if(curScr===1) go(2); },500);
         return;
       }
     }
@@ -881,6 +831,7 @@ function vTog(){
         document.getElementById('vpause').style.display='none';
         svEl2.classList.remove('playing');
         btn.classList.remove('hidden');
+        setTimeout(()=>{ if(curScr===0) go(1); },500);
       }
     },100);
     snd.play();
@@ -1160,7 +1111,6 @@ function qSwipe(screenDir){
     document.getElementById('qtxt').textContent=d.t;
     document.getElementById('qauthor').textContent=d.a;
     document.getElementById('qsrc').textContent=d.s;
-    document.getElementById('qsavebtn').classList.remove('saved');
     [0,1,2].forEach(i=>{const el=document.getElementById('d'+i);if(el){el.style.background=i===qi?'white':'rgba(255,255,255,0.35)';}});
 
     qcard.style.transition='none';
@@ -1172,28 +1122,6 @@ function qSwipe(screenDir){
     qcard.style.opacity='1';
     setTimeout(()=>{qcard.style.transition='';qAnm=false;},520);
   },240);
-}
-
-// Save quote — wax seal stamp effect
-function saveQuote(e){
-  const btn=document.getElementById('qsavebtn');
-  btn.classList.toggle('saved');
-  snd.save();
-  // ripple from tap point
-  const r=btn.getBoundingClientRect();
-  const x=e.clientX-r.left,y=e.clientY-r.top;
-  const rip=document.createElement('span');
-  rip.style.cssText=`position:absolute;left:${x}px;top:${y}px;width:0;height:0;border-radius:50%;
-    background:rgba(255,154,92,0.3);transform:translate(-50%,-50%);pointer-events:none;z-index:10;
-    animation:saveRipple 0.55s ease-out forwards;`;
-  btn.style.position='relative';btn.style.overflow='hidden';
-  btn.appendChild(rip);
-  setTimeout(()=>rip.remove(),600);
-  if(!document.getElementById('rkf')){
-    const s=document.createElement('style');s.id='rkf';
-    s.textContent='@keyframes saveRipple{0%{width:0;height:0;opacity:0.5}100%{width:300px;height:300px;opacity:0}}';
-    document.head.appendChild(s);
-  }
 }
 
 // ══════════ SOUND ENGINE ══════════
